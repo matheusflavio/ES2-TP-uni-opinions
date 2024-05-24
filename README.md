@@ -1,16 +1,19 @@
 # TP_Engenharia_De_Software_2
-## Objetivo
-Para esse projeto é idealizado um fórum de avaliação e discussão sobre professores da UFMG com classificação pro semestre lecionado.
 
 # Membros
 Matheus Flávio Gonçalves Silva
+
+# Explicação sobre o sistema
+Para esse sistema web é idealizado um fórum de avaliação a respeito de professores da UFMG com dados referentes ao período de 2020/1 a 2023/1, com classificação pro semestre lecionado validação se o professor deu aula da matéria no semestre, podendo ser feitas avaliações de forma anônima ou sem anonimato de acordo com o usuário.
 
 # Tecnologias
 - Quart
 - React
 - MongoDB
 
-# Instalação
+# Instruções de instalação e uso
+
+## Instalação
 O banco de dados utilizado é o MongoDB. Basta tê-lo instalado e operacional para rodar o sistema corretamente.
 
 ## Download do repositório
