@@ -35,14 +35,18 @@ python3 db/load_classes_from_csv.py db/classes.csv
 cd ..
 ```
 
-### Erro
-Em caso de erro, existe uma chance de o mongo já ter um Banco de Dados com nome "Professores".
-Caso não seja um banco importante, sugiro que faça o drop dele para utilizar o sistema sem problemas.
+### Erro: Apagar e criar o Bando de Dados novamente
+Em caso de erro, existe uma chance de o mongo já ter um Banco de Dados com nome "professores".
+Caso não seja um banco importante, sugiro apagar e criar novamente o Banco de Dados para usar o sistema.
 
 ```bash
+cd backend
 mongo
-show dbs # para conferir se existe um Banco de Dados chamado Professores
-use Professor
+show dbs # para conferir se existe um Banco de Dados chamado professores
+use professores
+db.dropDatabase()
+exit
+python3 db/load_classes_from_csv.py db/classes.csv
 ```
 
 ## Configuração do frontend
