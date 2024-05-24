@@ -1,0 +1,13 @@
+body {
+    background: #272A44;
+}
+
+.wrapper {
+    color: white;
+    
+    border: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+}

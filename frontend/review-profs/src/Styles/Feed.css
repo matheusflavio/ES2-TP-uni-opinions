@@ -1,0 +1,20 @@
+.feed {
+    width: calc(75% - 2px);
+
+    display: flex;
+    flex-direction: column;
+
+    margin-left: 25%;
+
+}
+
+h1 {
+    color: white;
+    font-size: 32pt;
+    margin: 20px 0;
+    margin-left: 20px;
+}
+
+hr {
+    width: calc(100% - 2px);
+}

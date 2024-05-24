@@ -1,0 +1,42 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+
+    position: fixed;
+
+    align-items: center;
+    justify-content: stretch;
+
+    border-right: 2px solid rgb(187, 187, 187);
+    
+    height: 100%;
+    width: 25%;
+}
+
+.sidebar h2 {
+    font-size: 2em;
+    margin: 10px 0;
+}
+
+.sidebar h2:first-child {
+    margin: 0;
+}
+
+.sidebar hr {
+    border: 0.5px solid rgb(187, 187, 187);
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    height: 85%;
+    text-align:center;
+}
+
+.bottom {
+    position: relative;
+    justify-self: flex-end;
+}
