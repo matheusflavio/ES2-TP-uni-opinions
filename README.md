@@ -11,18 +11,19 @@ Matheus Flávio Gonçalves Silva
 - MongoDB
 
 # Instalação
+O banco de dados utilizado é o MongoDB. Basta tê-lo instalado e operacional para rodar o sistema corretamente.
+
 ## Download do repositório
 ```bash
 git clone https://github.com/matheusflavio/ES2-TP-uni-opinions
+cd ES2-TP-uni-opinions
 ```
 
-## Configuração do ambiente
+## Configuração do ambiente com VENV (Opicional)
 ```bash
-cd ES2-TP-uni-opinions
-sudo apt update && sudo apt upgrade
-pip3 install venv
+pip3 install virtualenv
 python3 -m venv pyvirtual
-source pyvirtual
+source pyvirtual/bin/activate
 ```
 
 ## Configuração do backend + Banco de Dados
@@ -32,6 +33,16 @@ python3 -m pip install -r requirements.txt
 cp .env_example .env
 python3 db/load_classes_from_csv.py db/classes.csv
 cd ..
+```
+
+### Erro
+Em caso de erro, existe uma chance de o mongo já ter um Banco de Dados com nome "Professores".
+Caso não seja um banco importante, sugiro que faça o drop dele para utilizar o sistema sem problemas.
+
+```bash
+mongo
+show dbs # para conferir se existe um Banco de Dados chamado Professores
+use Professor
 ```
 
 ## Configuração do frontend
