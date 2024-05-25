@@ -86,17 +86,15 @@ async def login():
     Esse endpoint retorna o campo "session". Deve ser salvo como um cookie para requests futuros.
     """
     data = await request.json
-    if data is None:
+    if not data:
         return bad_request()
 
-    session_val = data.get("session", "")
-    session = await Session.find({"session_id": session_val}).first_or_none()
-    if session is not None:
-        user = await User.find({"user_id": session.linked_user_id}).first_or_none()
-        if not (await session.is_expired()):
-            await session.renew()
-            user = UserData(user.user_id, user.username, user.upvoted_reviews, user.downvoted_reviews)
-            return asdict(UserResponse(False, "Você já está logado!", user, session.session_id)), 409
+    session_id = data.get("session", "")
+    session = await find_session(session_id)
+    if session and not await session.is_expired():
+        user = await get_user_by_session(session)
+        await session.renew()
+        return handle_logged_in_user(user, session)
 
     username = data.get("username", "").strip()
     password_hash = data.get("password_hash", "")
@@ -104,15 +102,44 @@ async def login():
     if not username or not password_hash:
         return bad_request()
 
-    user = await User.find({"safe_username": username.lower()}).first_or_none()
-    if user is not None:
-        if user.password_hash == password_hash:
-            new_session = await Session.create_session(user)
-            user = UserData(user.user_id, user.username, user.upvoted_reviews, user.downvoted_reviews)
-            response = UserResponse(True, "Logado com sucesso.", user, new_session.session_id)
-            return asdict(response), 200
+    user = await find_user_by_username(username)
+    if user and user.password_hash == password_hash:
+        new_session = await create_new_session(user)
+        return handle_successful_login(user, new_session)
 
+    return handle_failed_login()
+
+
+async def find_session(session_id):
+    return await Session.find({"session_id": session_id}).first_or_none()
+
+
+async def get_user_by_session(session):
+    return await User.find({"user_id": session.linked_user_id}).first_or_none()
+
+
+async def find_user_by_username(username):
+    return await User.find({"safe_username": username.lower()}).first_or_none()
+
+
+async def create_new_session(user):
+    return await Session.create_session(user)
+
+
+def handle_logged_in_user(user, session):
+    user_data = UserData(user.user_id, user.username, user.upvoted_reviews, user.downvoted_reviews)
+    return asdict(UserResponse(False, "Você já está logado!", user_data, session.session_id)), 409
+
+
+def handle_successful_login(user, new_session):
+    user_data = UserData(user.user_id, user.username, user.upvoted_reviews, user.downvoted_reviews)
+    response = UserResponse(True, "Logado com sucesso.", user_data, new_session.session_id)
+    return asdict(response), 200
+
+
+def handle_failed_login():
     return asdict(UserResponse(False, "Credenciais incorretas.", None, "")), 401
+
 
 
 @app.route("/register", methods=["POST"])
@@ -534,7 +561,7 @@ async def downvote_review():
         await user.save()
         await review.save()
     else:
-        user.upvoted_reviews.append(review.id_review)
+        user.downvoted_reviews.append(review.id_review)
         review.n_votes -= 1
         await user.save()
         await review.save()
