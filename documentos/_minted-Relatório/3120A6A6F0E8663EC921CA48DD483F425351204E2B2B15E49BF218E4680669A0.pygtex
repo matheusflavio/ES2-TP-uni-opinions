@@ -1,0 +1,40 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{função} \PYG{n}{poligonoSimples}\PYG{p}{(}\PYG{n}{arestas}\PYG{p}{)}
+	\PYG{n}{eventos} \PYG{o}{=} \PYG{n}{lista} \PYG{n}{vazia}
+	\PYG{n}{para} \PYG{n}{cada} \PYG{n}{aresta} \PYG{n}{em} \PYG{n}{arestas}
+		\PYG{n}{adicione} \PYG{n}{aresta}\PYG{o}{.}\PYG{n}{ponto\PYGZus{}inicial} \PYG{n}{e} \PYG{n}{aresta}\PYG{o}{.}\PYG{n}{ponto\PYGZus{}final} \PYG{n}{à} \PYG{n}{lista} \PYG{n}{eventos}
+
+	\PYG{n}{ordene} \PYG{n}{eventos} \PYG{n}{por} \PYG{n}{coordenada} \PYG{n}{x} \PYG{n}{e} \PYG{n}{depois} \PYG{n}{por} \PYG{n}{coordenada} \PYG{n}{y}
+
+	\PYG{n}{segmentos\PYGZus{}ativos} \PYG{o}{=} \PYG{n}{árvore} \PYG{n}{balanceada} \PYG{n}{vazia}
+
+	\PYG{n}{para} \PYG{n}{cada} \PYG{n}{evento} \PYG{n}{em} \PYG{n}{eventos}
+		\PYG{n}{segmento} \PYG{o}{=} \PYG{n}{evento}\PYG{o}{.}\PYG{n}{segmento}
+		
+		\PYG{n}{se} \PYG{n}{evento} \PYG{n}{é} \PYG{n}{ponto\PYGZus{}inicial} \PYG{n}{do} \PYG{n}{segmento}
+			\PYG{n}{insira} \PYG{n}{segmento} \PYG{n}{em} \PYG{n}{segmentos\PYGZus{}ativos}
+			\PYG{n}{segmento\PYGZus{}acima} \PYG{o}{=} \PYG{n}{encontre} \PYG{n}{segmento} \PYG{n}{acima} \PYG{n}{do} \PYG{n}{atual} \PYG{n}{em}
+			\PYG{n}{segmentos\PYGZus{}ativos}
+
+			\PYG{n}{segmento\PYGZus{}abaixo} \PYG{o}{=} \PYG{n}{encontre} \PYG{n}{segmento} \PYG{n}{abaixo} \PYG{n}{do} \PYG{n}{atual} \PYG{n}{em}
+			\PYG{n}{segmentos\PYGZus{}ativos}
+
+			\PYG{n}{se} \PYG{n}{interseção}\PYG{p}{(}\PYG{n}{segmento}\PYG{p}{,} \PYG{n}{segmento\PYGZus{}acima}\PYG{p}{)} \PYG{n}{ou}
+			\PYG{n}{interseção}\PYG{p}{(}\PYG{n}{segmento}\PYG{p}{,} \PYG{n}{segmento\PYGZus{}abaixo}\PYG{p}{)}
+			
+				\PYG{n}{retorne} \PYG{n}{falso}
+				
+			\PYG{n}{senão}
+				\PYG{n}{segmento\PYGZus{}acima} \PYG{o}{=} \PYG{n}{encontre} \PYG{n}{segmento} \PYG{n}{acima} \PYG{n}{do} \PYG{n}{atual}
+				\PYG{n}{em} \PYG{n}{segmentos\PYGZus{}ativos}
+				
+				\PYG{n}{segmento\PYGZus{}abaixo} \PYG{o}{=} \PYG{n}{encontre} \PYG{n}{segmento} \PYG{n}{abaixo} \PYG{n}{do} \PYG{n}{atual}
+				\PYG{n}{em} \PYG{n}{segmentos\PYGZus{}ativos}
+
+			\PYG{n}{se} \PYG{n}{interseção}\PYG{p}{(}\PYG{n}{segmento\PYGZus{}acima}\PYG{p}{,} \PYG{n}{segmento\PYGZus{}abaixo}\PYG{p}{)}
+				\PYG{n}{retorne} \PYG{n}{falso}
+
+			\PYG{n}{remova} \PYG{n}{segmento} \PYG{n}{de} \PYG{n}{segmentos\PYGZus{}ativos}
+
+	\PYG{n}{retorne} \PYG{n}{verdadeiro}
+\end{Verbatim}

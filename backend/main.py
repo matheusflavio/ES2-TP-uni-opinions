@@ -329,89 +329,77 @@ async def create_review():
 @app.route("/fetch_review", methods=["POST"])
 @route_cors(allow_origin="*")
 async def fetch_review():
-    """
-    Obtêm uma lista de reviews que se encaixam nos filtros.
-    O json de requisição deve ser algo do tipo:
-    {
-        "sorting": 0,
-        "semester": "2020/2"
-        "teacher_id": "120526b0-9a0a-498c-acae-8d25a98d03e1",
-        "disciplina_id": "f0fc331b-1bb7-4978-91c6-ffff45141658",
-        "range_start": 0,
-        "range_end": 15
-    }
-    sorting simboliza o Enum SortingMethod
-    semester, teacher_id e disciplina_id, range_start e range_end são opcionais
-    range_start é 0 por padrão, e range_end é 15 por padrão.
-    Retorna 400 se não possuir o "sorting"
-    """
     data = await request.json
     if data is None:
         return bad_request()
 
-    sorting_method = data.get("sorting", "")
-    if sorting_method not in [
-        SortingMethod.NEWEST_FIRST,
-        SortingMethod.OLDEST_FIRST,
-        SortingMethod.MOST_UPVOTED,
-        SortingMethod.LEAST_UPVOTED,
-    ]:
+    sorting_method = data.get("sorting")
+    if sorting_method not in [method.value for method in SortingMethod]:
         return bad_request()
 
-    range_start = data.get("range_start", 0)
-    range_end = data.get("range_end", 15)
     try:
-        range_start = int(range_start)
-        range_end = int(range_end)
+        range_start = int(data.get("range_start", 0))
+        range_end = int(data.get("range_end", 15))
     except ValueError:
         return bad_request()
 
     mongodb_query = {}
-    semester = data.get("semester", "")
+    semester = data.get("semester")
     if semester:
         mongodb_query["semester"] = semester
 
-    teacher = data.get("teacher_id", "")
-    if teacher:
-        mongodb_query["teacher_id"] = teacher
+    teacher_id = data.get("teacher_id")
+    if teacher_id:
+        mongodb_query["teacher_id"] = teacher_id
 
-    disciplina = data.get("disciplina_id", "")
-    if disciplina:
-        mongodb_query["disciplina_id"] = disciplina
+    disciplina_id = data.get("disciplina_id")
+    if disciplina_id:
+        mongodb_query["disciplina_id"] = disciplina_id
 
-    sort = ()
-    if sorting_method == SortingMethod.NEWEST_FIRST:
-        sort = ("-time", "-n_votes")
-    elif sorting_method == SortingMethod.OLDEST_FIRST:
-        sort = ("+time", "-n_votes")
-    elif sorting_method == SortingMethod.MOST_UPVOTED:
-        sort = ("-n_votes", "-time")
-    elif sorting_method == SortingMethod.LEAST_UPVOTED:
-        sort = ("+n_votes", "-time")
+    sort_criteria = get_sort_criteria(sorting_method)
 
-    eligible = await Review.find(mongodb_query).skip(range_start).limit(range_end - range_start).sort(*sort).to_list()
+    reviews = await fetch_reviews_from_database(mongodb_query, sort_criteria, range_start, range_end)
 
-    response_data = []
-    for result in eligible:
-        disciplina = await Disciplina.find(Disciplina.id_disciplina == result.disciplina_id).first_or_none()
-        professor = await Professor.find(Professor.uid_professor == result.teacher_id).first_or_none()
-        if not disciplina or not professor:
-            continue
-
-        response_data.append(
-            ReviewData(
-                review_id=result.id_review,
-                autor="Anônimo" if result.is_anonymous else result.author,
-                content=result.content,
-                time=result.time,
-                votes=result.n_votes,
-                semester=result.semester,
-                professor=professor.nome,
-                disciplina=disciplina.nome,
-            )
-        )
+    # Aguardando a formatação dos dados para garantir que seja concluída antes de prosseguir
+    response_data = await format_reviews_data(reviews)
 
     return asdict(ReviewResponse(True, "Dados obtidos com sucesso!", response_data)), 200
+
+
+def get_sort_criteria(sorting_method):
+    if sorting_method == SortingMethod.NEWEST_FIRST:
+        return ("-time", "-n_votes")
+    elif sorting_method == SortingMethod.OLDEST_FIRST:
+        return ("+time", "-n_votes")
+    elif sorting_method == SortingMethod.MOST_UPVOTED:
+        return ("-n_votes", "-time")
+    elif sorting_method == SortingMethod.LEAST_UPVOTED:
+        return ("+n_votes", "-time")
+
+async def fetch_reviews_from_database(query, sort_criteria, range_start, range_end):
+    return await Review.find(query).skip(range_start).limit(range_end - range_start).sort(*sort_criteria).to_list()
+
+async def format_reviews_data(reviews):
+    response_data = []
+    for result in reviews:
+        disciplina = await Disciplina.find(Disciplina.id_disciplina == result.disciplina_id).first_or_none()
+        professor = await Professor.find(Professor.uid_professor == result.teacher_id).first_or_none()
+        if disciplina and professor:
+            response_data.append(format_review(result, disciplina.nome, professor.nome))
+    return response_data
+
+def format_review(review, disciplina_nome, professor_nome):
+    return ReviewData(
+        review_id=review.id_review,
+        autor="Anônimo" if review.is_anonymous else review.author,
+        content=review.content,
+        time=review.time,
+        votes=review.n_votes,
+        semester=review.semester,
+        professor=professor_nome,
+        disciplina=disciplina_nome,
+    )
+
 
 
 @app.route("/upvote_review", methods=["POST"])

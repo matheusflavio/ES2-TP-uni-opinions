@@ -1,0 +1,30 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{função} \PYG{n}{triangulaçãoOrelhas}\PYG{p}{(}\PYG{n}{polígono}\PYG{p}{)}
+	\PYG{n}{se} \PYG{n}{orientação}\PYG{p}{(}\PYG{n}{polígono}\PYG{p}{)} \PYG{n}{é} \PYG{n}{horário}
+		\PYG{n}{inverta} \PYG{n}{a} \PYG{n}{ordem} \PYG{n}{dos} \PYG{n}{vértices} \PYG{n}{de} \PYG{n}{polígono}
+
+	\PYG{n}{vértices\PYGZus{}ativos} \PYG{o}{=} \PYG{n}{copie} \PYG{n}{os} \PYG{n}{vértices} \PYG{n}{do} \PYG{n}{polígono} \PYG{n}{para} \PYG{n}{uma} \PYG{n}{nova} \PYG{n}{lista}
+	\PYG{n}{triângulos} \PYG{o}{=} \PYG{n}{lista} \PYG{n}{vazia}
+
+	\PYG{n}{enquanto} \PYG{n}{tamanho} \PYG{n}{de} \PYG{n}{vértices\PYGZus{}ativos} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{3}
+		\PYG{n}{para} \PYG{n}{i} \PYG{n}{de} \PYG{l+m+mi}{0} \PYG{n}{até} \PYG{n}{tamanho} \PYG{n}{de} \PYG{n}{vértices\PYGZus{}ativos} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}
+			\PYG{n}{a} \PYG{o}{=} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}
+			\PYG{n}{b} \PYG{o}{=} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{[(}\PYG{n}{i} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{\PYGZpc{}} \PYG{n}{tamanho} \PYG{n}{de} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{]}
+			\PYG{n}{c} \PYG{o}{=} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{[(}\PYG{n}{i} \PYG{o}{+} \PYG{l+m+mi}{2}\PYG{p}{)} \PYG{o}{\PYGZpc{}} \PYG{n}{tamanho} \PYG{n}{de} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{]}
+
+            \PYG{n}{se} \PYG{n}{éOrelha}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{,} \PYG{n}{vértices\PYGZus{}ativos}\PYG{p}{)}
+				\PYG{n}{adicione} \PYG{p}{(}\PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{)} \PYG{n}{à} \PYG{n}{lista} \PYG{n}{triângulos}
+				\PYG{n}{remova} \PYG{n}{b} \PYG{n}{de} \PYG{n}{vértices\PYGZus{}ativos}
+				\PYG{n}{pare} \PYG{n}{o} \PYG{n}{loop}
+	\PYG{n}{adicione} \PYG{n}{o} \PYG{n}{último} \PYG{n}{triângulo} \PYG{n}{formado} \PYG{n}{pelos} \PYG{l+m+mi}{3} \PYG{n}{vértices} \PYG{n}{restantes} \PYG{n}{à} \PYG{n}{lista} \PYG{n}{de} \PYG{n}{triângulos}
+	\PYG{n}{retorne} \PYG{n}{triângulos}
+
+\PYG{n}{função} \PYG{n}{éOrelha}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{,} \PYG{n}{vértices}\PYG{p}{)}
+	\PYG{n}{se} \PYG{n}{ângulo}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{)} \PYG{o}{\PYGZgt{}=} \PYG{l+m+mi}{180} \PYG{n}{graus}
+		\PYG{n}{retorne} \PYG{n}{falso}
+	\PYG{n}{triângulo} \PYG{o}{=} \PYG{p}{(}\PYG{n}{a}\PYG{p}{,} \PYG{n}{b}\PYG{p}{,} \PYG{n}{c}\PYG{p}{)}
+	\PYG{n}{para} \PYG{n}{cada} \PYG{n}{vértice} \PYG{n}{em} \PYG{n}{vértices}
+		\PYG{n}{se} \PYG{n}{vértice} \PYG{n}{não} \PYG{n}{é} \PYG{n}{igual} \PYG{n}{a} \PYG{n}{a}\PYG{p}{,} \PYG{n}{b} \PYG{n}{ou} \PYG{n}{c} \PYG{n}{e} \PYG{n}{vértice} \PYG{n}{está} \PYG{n}{dentro} \PYG{n}{do} \PYG{n}{triângulo}
+			\PYG{n}{retorne} \PYG{n}{falso}
+	\PYG{n}{retorne} \PYG{n}{verdadeiro}
+\end{Verbatim}
