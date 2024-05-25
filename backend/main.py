@@ -266,64 +266,91 @@ async def create_review():
     if data is None:
         return bad_request()
 
-    session_val = data.get("session", "")
-    session = await Session.find({"session_id": session_val}).first_or_none()
-    if session is None:
-        return asdict(GenericResponse(False, "Você não está logado!")), 403
-    else:
-        if await session.is_expired():
-            return asdict(GenericResponse(False, "Por favor, faça login novamente.")), 403
+    session = await get_session(data.get("session"))
+    if not session or await session.is_expired():
+        return asdict(GenericResponse(False, "Você não está logado ou sua sessão expirou.")), 403
 
-    user = await User.find(User.user_id == session.linked_user_id).first_or_none()
-    if user is None:
+    user = await get_user(session)
+    if not user:
         await session.delete_session()
         return asdict(GenericResponse(False, "Conta inexistente.")), 403
 
-    semester = data.get("semester", "")
-    teacher = data.get("teacher_id", "")
-    disciplina = data.get("disciplina_id", "")
-    content = data.get("content", "")
-    is_anonymous = data.get("is_anonymous", "")
-    if not semester or not teacher or not disciplina or not content or is_anonymous == "":
+    semester = data.get("semester")
+    teacher_id = data.get("teacher_id")
+    disciplina_id = data.get("disciplina_id")
+    content = data.get("content")
+    is_anonymous = data.get("is_anonymous")
+
+    if not semester or not teacher_id or not disciplina_id or not content or is_anonymous is None:
         return bad_request()
 
     if len(content) > 500:
         return asdict(GenericResponse(False, "Mensagem grande demais.")), 413
 
-    teacher = await Professor.find(Professor.uid_professor == teacher).first_or_none()
-    if teacher is None:
+    teacher = await get_teacher(teacher_id)
+    if not teacher:
         return asdict(GenericResponse(False, "Professor inexistente.")), 404
 
-    disciplina = await Disciplina.find(Disciplina.id_disciplina == disciplina).first_or_none()
-    if disciplina is None:
+    disciplina = await get_disciplina(disciplina_id)
+    if not disciplina:
         return asdict(GenericResponse(False, "Disciplina inexistente.")), 404
 
-    turma = await Turma.find(
-        Turma.id_disciplina == disciplina.id_disciplina,
-        Turma.uid_professor_ministrante == teacher.uid_professor,
-        Turma.semestre == semester,
-    ).first_or_none()
-    if turma is None:
+    turma = await get_turma(disciplina.id_disciplina, teacher.uid_professor, semester)
+    if not turma:
         return asdict(GenericResponse(False, "Esse professor não ministrou essa matéria nesse semestre.")), 404
 
-    review_obj = await Review.create_review(
-        user.username, user.user_id, is_anonymous, teacher.uid_professor, disciplina.id_disciplina, semester, content
-    )
+    review_obj = await create_new_review(user, is_anonymous, teacher.uid_professor, disciplina.id_disciplina, semester, content)
 
-    user.upvoted_reviews.append(review_obj.id_review)
     await user.save()
 
-    review = ReviewData(
+    review_data = await prepare_review_data(review_obj, semester, teacher.nome, disciplina.nome)
+    return asdict(ReviewResponse(True, "Review criado com sucesso!", [review_data])), 200
+
+
+async def get_session(session_id):
+    return await Session.find({"session_id": session_id}).first_or_none()
+
+
+async def get_user(session):
+    return await User.find(User.user_id == session.linked_user_id).first_or_none()
+
+
+async def get_teacher(teacher_id):
+    return await Professor.find(Professor.uid_professor == teacher_id).first_or_none()
+
+
+async def get_disciplina(disciplina_id):
+    return await Disciplina.find(Disciplina.id_disciplina == disciplina_id).first_or_none()
+
+
+async def get_turma(disciplina_id, professor_id, semester):
+    return await Turma.find(
+        Turma.id_disciplina == disciplina_id,
+        Turma.uid_professor_ministrante == professor_id,
+        Turma.semestre == semester,
+    ).first_or_none()
+
+
+async def create_new_review(user, is_anonymous, teacher_id, disciplina_id, semester, content):
+    review_obj = await Review.create_review(
+        user.username, user.user_id, is_anonymous, teacher_id, disciplina_id, semester, content
+    )
+    user.upvoted_reviews.append(review_obj.id_review)
+    return review_obj
+
+
+async def prepare_review_data(review_obj, semester, professor_name, disciplina_name):
+    return ReviewData(
         review_id=review_obj.id_review,
         autor="Anônimo" if review_obj.is_anonymous else review_obj.author,
         content=review_obj.content,
         time=review_obj.time,
         votes=review_obj.n_votes,
         semester=semester,
-        professor=teacher.nome,
-        disciplina=disciplina.nome,
+        professor=professor_name,
+        disciplina=disciplina_name,
     )
-    return asdict(ReviewResponse(True, "Review criado com sucesso!", [review])), 200
+
 
 
 @app.route("/fetch_review", methods=["POST"])
